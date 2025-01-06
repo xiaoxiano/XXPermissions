@@ -1,18 +1,18 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 34
+    compileSdk 34
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 21
         versionCode 2000
         versionName "20.0"
     }
 
     // 使用 JDK 1.8
     compileOptions {
-        targetCompatibility JavaVersion.VERSION_11
-        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
     }
 
     lintOptions {
@@ -30,19 +30,18 @@ android {
         // 剔除这个包下的所有文件（不会移除签名信息）
         exclude 'META-INF/*******'
     }
-}
+    namespace 'com.hjq.permissions'
 
-afterEvaluate {
-    // 排除 BuildConfig.class 和 R.class
-    generateReleaseBuildConfig.enabled = false
-    generateDebugBuildConfig.enabled = false
-    generateReleaseResValues.enabled = false
-    generateDebugResValues.enabled = false
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
     // noinspection GradleCompatible
     implementation 'androidx.fragment:fragment:1.5.7'
+
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0"))
 }
 
 tasks.withType(Javadoc).configureEach {
@@ -55,17 +54,24 @@ tasks.withType(Javadoc).configureEach {
 
 tasks.register('sourcesJar', Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
+
+/*afterEvaluate {
+    tasks.javadoc.classpath += files(project.android.getBootClasspath())
+}*/
 
 tasks.register('javadoc', Javadoc) {
     source = android.sourceSets.main.java.srcDirs
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    //classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += files("${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar")
+
+    //classpath += files(android.bootClasspath.join(File.pathSeparator))
 }
 
 tasks.register('javadocJar', Jar) {
     dependsOn javadoc
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 

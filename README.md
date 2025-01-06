@@ -1,3 +1,5 @@
+**upgrade to v20.0 + androidx + java17 + gradle8.2.1**
+
 # [English Doc](README-en.md)
 
 # 权限请求框架

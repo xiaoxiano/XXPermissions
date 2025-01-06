@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 34
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.hjq.permissions.demo"
-        minSdkVersion 16
-        targetSdkVersion 34
+        minSdkVersion 21
+        targetSdk 34
         versionCode 2000
         versionName "20.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -14,8 +14,8 @@ android {
 
     // 使用 JDK 1.8
     compileOptions {
-        targetCompatibility JavaVersion.VERSION_11
-        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
     }
 
     // Apk 签名的那些事：https://www.jianshu.com/p/a1f8e5896aa2
@@ -41,6 +41,7 @@ android {
             signingConfig signingConfigs.config
         }
     }
+    namespace 'com.hjq.permissions.demo'
 
     applicationVariants.configureEach { variant ->
         // apk 输出文件名配置
@@ -58,7 +59,7 @@ dependencies {
 
     // 谷歌兼容库：https://developer.android.google.cn/jetpack/androidx/releases/appcompat?hl=zh-cn
     // noinspection GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 
     // 吐司框架：https://github.com/getActivity/Toaster
     implementation 'com.github.getActivity:Toaster:12.6'
