@@ -23,7 +23,7 @@ public final class XXPermissions {
     public static final int REQUEST_CODE = 1024 + 1;
 
     /** 权限请求拦截器 */
-    private static IPermissionInterceptor sInterceptor;
+    private static OnPermissionInterceptor sInterceptor;
 
     /** 当前是否为检查模式 */
     private static Boolean sCheckMode;
@@ -55,16 +55,16 @@ public final class XXPermissions {
     /**
      * 设置全局权限请求拦截器
      */
-    public static void setInterceptor(IPermissionInterceptor interceptor) {
+    public static void setInterceptor(OnPermissionInterceptor interceptor) {
         sInterceptor = interceptor;
     }
 
     /**
      * 获取全局权限请求拦截器
      */
-    public static IPermissionInterceptor getInterceptor() {
+    public static OnPermissionInterceptor getInterceptor() {
         if (sInterceptor == null) {
-            sInterceptor = new IPermissionInterceptor() {};
+            sInterceptor = new OnPermissionInterceptor() {};
         }
         return sInterceptor;
     }
@@ -79,7 +79,7 @@ public final class XXPermissions {
 
     /** 权限请求拦截器 */
     @Nullable
-    private IPermissionInterceptor mInterceptor;
+    private OnPermissionInterceptor mInterceptor;
 
     /** 设置不检查 */
     @Nullable
@@ -95,6 +95,17 @@ public final class XXPermissions {
     /**
      * 添加权限组
      */
+    public XXPermissions permission(@PermissionLimit @Nullable String permission) {
+        if (permission == null) {
+            return this;
+        }
+        if (PermissionUtils.containsPermission(mPermissions, permission)) {
+            return this;
+        }
+        mPermissions.add(permission);
+        return this;
+    }
+
     public XXPermissions permission(@Nullable String... permissions) {
         return permission(PermissionUtils.asArrayList(permissions));
     }
@@ -120,7 +131,7 @@ public final class XXPermissions {
     /**
      * 设置权限请求拦截器
      */
-    public XXPermissions interceptor(@Nullable IPermissionInterceptor interceptor) {
+    public XXPermissions interceptor(@Nullable OnPermissionInterceptor interceptor) {
         mInterceptor = interceptor;
         return this;
     }
@@ -147,7 +158,7 @@ public final class XXPermissions {
 
         final Context context = mContext;
 
-        final IPermissionInterceptor interceptor = mInterceptor;
+        final OnPermissionInterceptor interceptor = mInterceptor;
 
         // 权限请求列表（为什么直接不用字段？因为框架要兼容新旧权限，在低版本下会自动添加旧权限申请，为了避免重复添加）
         final List<String> permissions = new ArrayList<>(mPermissions);
@@ -182,6 +193,8 @@ public final class XXPermissions {
             PermissionChecker.checkNotificationListenerPermission(permissions, androidManifestInfo);
             // 检查蓝牙和 WIFI 权限申请是否符合规范
             PermissionChecker.checkNearbyDevicesPermission(permissions, androidManifestInfo);
+            // 检查对照片和视频的部分访问权限申请是否符合规范
+            PermissionChecker.checkReadMediaVisualUserSelectedPermission(permissions);
             // 检查申请的权限和 targetSdk 版本是否能吻合
             PermissionChecker.checkTargetSdkVersion(context, permissions);
             // 检测权限有没有在清单文件中注册
@@ -193,10 +206,8 @@ public final class XXPermissions {
 
         if (PermissionApi.isGrantedPermissions(context, permissions)) {
             // 证明这些权限已经全部授予过，直接回调成功
-            if (callback != null) {
-                interceptor.grantedPermissionRequest(activity, permissions, permissions, true, callback);
-                interceptor.finishPermissionRequest(activity, permissions, true, callback);
-            }
+            interceptor.grantedPermissionRequest(activity, permissions, permissions, true, callback);
+            interceptor.finishPermissionRequest(activity, permissions, true, callback);
             return;
         }
 
@@ -306,22 +317,22 @@ public final class XXPermissions {
     }
 
     /**
-     * 判断一个或多个权限是否被永久拒绝了
+     * 判断一个或多个权限是否被勾选了不再询问的选项
      *
      * 注意不能在请求权限之前调用，一定要在 {@link OnPermissionCallback#onDenied(List, boolean)} 方法中调用
-     * 如果你在应用启动后，没有申请过这个权限，然后去判断它有没有永久拒绝，这样系统会一直返回 true，也就是永久拒绝
-     * 但是实际并没有永久拒绝，系统只是不想让你知道权限是否被永久拒绝了，你必须要申请过这个权限，才能去判断这个权限是否被永久拒绝
+     * 如果你在应用启动后，没有申请过这个权限，然后去判断它有没有勾选不再询问的选项，这样系统会一直返回 true，也就是不再询问
+     * 但是实际上还能继续申请，系统只是不想让你知道权限是否勾选了不再询问的选项，你必须要申请过这个权限，才能去判断这个权限是否勾选了不再询问的选项
      */
-    public static boolean isPermanentDenied(@NonNull Activity activity, @NonNull String... permissions) {
-        return isPermanentDenied(activity, PermissionUtils.asArrayList(permissions));
+    public static boolean isDoNotAskAgainPermissions(@NonNull Activity activity, @NonNull String... permissions) {
+        return isDoNotAskAgainPermissions(activity, PermissionUtils.asArrayList(permissions));
     }
 
-    public static boolean isPermanentDenied(@NonNull Activity activity, @NonNull String[]... permissions) {
-        return isPermanentDenied(activity, PermissionUtils.asArrayLists(permissions));
+    public static boolean isDoNotAskAgainPermissions(@NonNull Activity activity, @NonNull String[]... permissions) {
+        return isDoNotAskAgainPermissions(activity, PermissionUtils.asArrayLists(permissions));
     }
 
-    public static boolean isPermanentDenied(@NonNull Activity activity, @NonNull List<String> permissions) {
-        return PermissionApi.isPermissionPermanentDenied(activity, permissions);
+    public static boolean isDoNotAskAgainPermissions(@NonNull Activity activity, @NonNull List<String> permissions) {
+        return PermissionApi.isDoNotAskAgainPermissions(activity, permissions);
     }
 
     /* android.content.Context */
@@ -349,7 +360,7 @@ public final class XXPermissions {
             startPermissionActivity(activity, permissions);
             return;
         }
-        Intent intent = PermissionUtils.getSmartPermissionIntent(context, permissions);
+        Intent intent = PermissionApi.getSmartPermissionIntent(context, permissions);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
@@ -380,7 +391,7 @@ public final class XXPermissions {
     public static void startPermissionActivity(@NonNull Activity activity,
                                                @NonNull List<String> permissions,
                                                int requestCode) {
-        Intent intent = PermissionUtils.getSmartPermissionIntent(activity, permissions);
+        Intent intent = PermissionApi.getSmartPermissionIntent(activity, permissions);
         StartActivityManager.startActivityForResult(activity, intent, requestCode);
     }
 
@@ -403,7 +414,7 @@ public final class XXPermissions {
             StartActivityManager.startActivity(activity, PermissionIntentManager.getApplicationDetailsIntent(activity));
             return;
         }
-        PermissionPageFragment.beginRequest(activity, (ArrayList<String>) permissions, callback);
+        PermissionPageFragment.launch(activity, permissions, callback);
     }
 
     /* android.app.Fragment */
@@ -438,7 +449,7 @@ public final class XXPermissions {
             StartActivityManager.startActivity(fragment, PermissionIntentManager.getApplicationDetailsIntent(activity));
             return;
         }
-        Intent intent = PermissionUtils.getSmartPermissionIntent(activity, permissions);
+        Intent intent = PermissionApi.getSmartPermissionIntent(activity, permissions);
         StartActivityManager.startActivityForResult(fragment, intent, requestCode);
     }
 
@@ -468,7 +479,7 @@ public final class XXPermissions {
             StartActivityManager.startActivity(fragment, PermissionIntentManager.getApplicationDetailsIntent(activity));
             return;
         }
-        PermissionPageFragment.beginRequest(activity, (ArrayList<String>) permissions, callback);
+        PermissionPageFragment.launch(activity, permissions, callback);
     }
 
     /* android.support.v4.app.Fragment */
@@ -503,7 +514,7 @@ public final class XXPermissions {
             StartActivityManager.startActivity(fragment, PermissionIntentManager.getApplicationDetailsIntent(activity));
             return;
         }
-        Intent intent = PermissionUtils.getSmartPermissionIntent(activity, permissions);
+        Intent intent = PermissionApi.getSmartPermissionIntent(activity, permissions);
         StartActivityManager.startActivityForResult(fragment, intent, requestCode);
     }
 
@@ -533,6 +544,6 @@ public final class XXPermissions {
             StartActivityManager.startActivity(fragment, PermissionIntentManager.getApplicationDetailsIntent(activity));
             return;
         }
-        PermissionPageFragment.beginRequest(activity, (ArrayList<String>) permissions, callback);
+        PermissionPageFragment.launch(activity, permissions, callback);
     }
 }

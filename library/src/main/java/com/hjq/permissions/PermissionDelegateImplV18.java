@@ -12,31 +12,32 @@ import androidx.annotation.RequiresApi;
  *    time   : 2023/03/11
  *    desc   : Android 4.3 权限委托实现
  */
-@RequiresApi(api = AndroidVersion.ANDROID_4_3)
-class PermissionDelegateImplV18 extends PermissionDelegateImplV14 {
+class PermissionDelegateImplV18 extends PermissionDelegateImplBase {
 
     @Override
     public boolean isGrantedPermission(@NonNull Context context, @NonNull String permission) {
-        // 检测通知栏监听权限
         if (PermissionUtils.equalsPermission(permission, Permission.BIND_NOTIFICATION_LISTENER_SERVICE)) {
             return NotificationListenerPermissionCompat.isGrantedPermission(context);
         }
+
         return super.isGrantedPermission(context, permission);
     }
 
     @Override
-    public boolean isPermissionPermanentDenied(@NonNull Activity activity, @NonNull String permission) {
+    public boolean isDoNotAskAgainPermission(@NonNull Activity activity, @NonNull String permission) {
         if (PermissionUtils.equalsPermission(permission, Permission.BIND_NOTIFICATION_LISTENER_SERVICE)) {
             return false;
         }
-        return super.isPermissionPermanentDenied(activity, permission);
+
+        return super.isDoNotAskAgainPermission(activity, permission);
     }
 
     @Override
-    public Intent getPermissionIntent(@NonNull Context context, @NonNull String permission) {
+    public Intent getPermissionSettingIntent(@NonNull Context context, @NonNull String permission) {
         if (PermissionUtils.equalsPermission(permission, Permission.BIND_NOTIFICATION_LISTENER_SERVICE)) {
             return NotificationListenerPermissionCompat.getPermissionIntent(context);
         }
-        return super.getPermissionIntent(context, permission);
+
+        return super.getPermissionSettingIntent(context, permission);
     }
 }

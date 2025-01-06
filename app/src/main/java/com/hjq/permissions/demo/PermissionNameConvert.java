@@ -3,9 +3,7 @@ package com.hjq.permissions.demo;
 import android.content.Context;
 import android.os.Build;
 import androidx.annotation.NonNull;
-
 import com.hjq.permissions.Permission;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,7 @@ public final class PermissionNameConvert {
     /**
      * 获取权限名称
      */
-   public static String getPermissionString(Context context, List<String> permissions) {
+   public static String getPermissionNames(Context context, List<String> permissions) {
       return listToString(context, permissionsToNames(context, permissions));
    }
 
@@ -67,7 +65,8 @@ public final class PermissionNameConvert {
                    break;
                }
                case Permission.READ_MEDIA_IMAGES:
-               case Permission.READ_MEDIA_VIDEO: {
+               case Permission.READ_MEDIA_VIDEO:
+               case Permission.READ_MEDIA_VISUAL_USER_SELECTED: {
                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                        String hint = context.getString(R.string.common_permission_image_and_video);
                        if (!permissionNames.contains(hint)) {

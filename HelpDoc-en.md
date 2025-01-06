@@ -40,7 +40,7 @@
 
 #### Android 11 storage permission adaptation
 
-* If your project needs to adapt to Android 11storage permissions, you need to upgrade targetSdkVersion first.
+* If your project needs to adapt to Android 11 storage permissions, you need to upgrade targetSdkVersion first.
 
 ```groovy
 android 
@@ -123,7 +123,7 @@ XXPermissions.with(MainActivity.this)
 
 #### What should I do if the dialog box pops up before and after the permission application
 
-* An interceptor interface is provided inside the framework. It is enough to implement the interface provided [ IPermissionInterceptor ](/library/src/main/java/com/hjq/permissions/IPermissionInterceptor.java) in the framework. For specific implementation, please refer to the [ PermissionInterceptor ](app/src/main/java/com/hjq/permissions/demo/PermissionInterceptor.java) class provided in Demo. It is recommended to download the source code and read it, and then introduce the code into the project
+* An interceptor interface is provided inside the framework. It is enough to implement the interface provided [OnPermissionInterceptor](/library/src/main/java/com/hjq/permissions/OnPermissionInterceptor.java) in the framework. For specific implementation, please refer to the [ PermissionInterceptor ](app/src/main/java/com/hjq/permissions/demo/PermissionInterceptor.java) class provided in Demo. It is recommended to download the source code and read it, and then introduce the code into the project
 
 * The way to use interception is also very simple. There are two specific settings, one for local settings and the other for global settings.
 
@@ -179,8 +179,8 @@ XXPermissions.with(this)
             @Override
             public void onDenied(@NonNull List<String> permissions, boolean doNotAskAgain) {
                 if (doNotAskAgain && permissions.contains(Permission.RECORD_AUDIO) &&
-                        XXPermissions.isPermanentDenied(MainActivity.this, Permission.RECORD_AUDIO)) {
-                    toast("Recording permission has been permanently denied");
+                        XXPermissions.isDoNotAskAgainPermissions(MainActivity.this, Permission.RECORD_AUDIO)) {
+                    toast("The recording permission request was denied, and the user checked Do not ask");
                 }
             }
         });

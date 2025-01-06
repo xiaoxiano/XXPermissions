@@ -129,7 +129,7 @@ XXPermissions.with(MainActivity.this)
 
 #### 我想在申请前和申请后统一弹对话框该怎么处理
 
-* 框架内部有提供一个拦截器接口，通过实现框架中提供的 [IPermissionInterceptor](/library/src/main/java/com/hjq/permissions/IPermissionInterceptor.java) 接口即可，具体实现可参考 Demo 中提供的 [PermissionInterceptor](app/src/main/java/com/hjq/permissions/demo/PermissionInterceptor.java) 类，建议下载源码后进行阅读，再将代码引入到项目中
+* 框架内部有提供一个拦截器接口，通过实现框架中提供的 [OnPermissionInterceptor](/library/src/main/java/com/hjq/permissions/OnPermissionInterceptor.java) 接口即可，具体实现可参考 Demo 中提供的 [PermissionInterceptor](app/src/main/java/com/hjq/permissions/demo/PermissionInterceptor.java) 类，建议下载源码后进行阅读，再将代码引入到项目中
 
 * 使用拦截的方式也很简单，具体有两种设置方式，一种针对局部设置，另外一种是全局设置
 
@@ -185,8 +185,8 @@ XXPermissions.with(this)
             @Override
             public void onDenied(@NonNull List<String> permissions, boolean doNotAskAgain) {
                 if (doNotAskAgain && permissions.contains(Permission.RECORD_AUDIO) &&
-                        XXPermissions.isPermanentDenied(MainActivity.this, Permission.RECORD_AUDIO)) {
-                    toast("录音权限被永久拒绝了");
+                        XXPermissions.isDoNotAskAgainPermissions(MainActivity.this, Permission.RECORD_AUDIO)) {
+                    toast("录音权限请求被拒绝了，并且用户勾选了不再询问");
                 }
             }
         });
@@ -289,7 +289,7 @@ public class PermissionActivity extends AppCompatActivity implements OnPermissio
 
 * 另外值得一提的是 [Android 11 对软件包可见性进行了限制](https://developer.android.google.cn/about/versions/11/privacy/package-visibility)，所以这种跳包名的方式在未来将会完全不可行。
 
-* 最终决定：这个功能的出发点是好的，但是我们没办法做好它，经过慎重考虑，决定将这个功能在 [**XXPermissions** 9.2 版本](https://github.com/getActivity/XXPermissions/releases/tag/9.2)及之后的版本进行移除。
+* 最终决定：这个功能的出发点是好的，但是我们没办法做好它，经过慎重考虑，决定将这个功能在 [9.2](https://github.com/getActivity/XXPermissions/releases/tag/9.2) 及之后的版本进行移除。
 
 #### 为什么不用 ActivityResultContract 来申请权限
 
@@ -334,10 +334,10 @@ context.startActivity(intent);
 
 #### 如何应对国内某些应用商店在明确拒绝权限后 48 小时内不允许再次申请的问题
 
-* 首先这种属于业务逻辑的问题，框架本身是不会做这种事情的，但并非不能实现，这得益于框架良好的设计，框架内部提供了一个叫 IPermissionInterceptor 的拦截器类，当前有权限申请的时候，会走 requestPermissions 方法的回调，你可以重写这个方法的逻辑，先去判断要申请的权限是否在 48 小时内已经申请过了一次了，如果没有的话，就走权限申请的流程，如果有的话，那么就直接回调权限申请失败的方法。
+* 首先这种属于业务逻辑的问题，框架本身是不会做这种事情的，但并非不能实现，这得益于框架良好的设计，框架内部提供了一个叫 OnPermissionInterceptor 的拦截器类，当前有权限申请的时候，会走 requestPermissions 方法的回调，你可以重写这个方法的逻辑，先去判断要申请的权限是否在 48 小时内已经申请过了一次了，如果没有的话，就走权限申请的流程，如果有的话，那么就直接回调权限申请失败的方法。
 
 ```java
-public final class PermissionInterceptor implements IPermissionInterceptor {
+public final class PermissionInterceptor implements OnPermissionInterceptor {
 
     private static final String SP_NAME_PERMISSION_REQUEST_TIME_RECORD = "permission_request_time_record";
 
@@ -359,7 +359,7 @@ public final class PermissionInterceptor implements IPermissionInterceptor {
         }
         sharedPreferences.edit().putLong(permissionKey, System.currentTimeMillis()).apply();
         // 如果之前没有申请过权限，或者距离上次申请已经超过了 48 个小时，则进行申请权限
-        IPermissionInterceptor.super.requestPermissions(activity, allPermissions, callback);
+        OnPermissionInterceptor.super.requestPermissions(activity, allPermissions, callback);
     }
     
     @Override

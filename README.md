@@ -8,7 +8,7 @@
 
 * 博文地址：[一句代码搞定权限请求，从未如此简单](https://www.jianshu.com/p/c69ff8a445ed)
 
-* 可以扫码下载 Demo 进行演示或者测试，如果扫码下载不了的，[点击此处可直接下载](https://github.com/getActivity/XXPermissions/releases/download/18.2/XXPermissions.apk)
+* 可以扫码下载 Demo 进行演示或者测试，如果扫码下载不了的，[点击此处可直接下载](https://github.com/getActivity/XXPermissions/releases/download/20.0/XXPermissions.apk)
 
 ![](picture/zh/download_demo_apk_qr_code.png)
 
@@ -52,7 +52,7 @@ dependencyResolutionManagement {
 
 ```groovy
 android {
-    // 支持 JDK 1.8
+    // 支持 JDK 1.8 及以上
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -61,7 +61,7 @@ android {
 
 dependencies {
     // 权限请求框架：https://github.com/getActivity/XXPermissions
-    implementation 'com.github.getActivity:XXPermissions:18.2'
+    implementation 'com.github.getActivity:XXPermissions:20.0'
 }
 ```
 
@@ -183,8 +183,8 @@ XXPermissions.getDenied(Context context, String... permissions);
 // 判断某个权限是否为特殊权限
 XXPermissions.isSpecial(String permission);
 
-// 判断一个或多个权限是否被永久拒绝了（一定要在权限申请的回调方法中调用才有效果）
-XXPermissions.isPermanentDenied(Activity activity, String... permissions);
+// 判断一个或多个权限是否被勾选了《不再询问》的选项（一定要在权限申请的回调方法中调用才有效果）
+XXPermissions.isDoNotAskAgainPermissions(Activity activity, String... permissions);
 
 // 跳转到应用权限设置页
 XXPermissions.startPermissionActivity(Context context, String... permissions);
@@ -196,7 +196,15 @@ XXPermissions.startPermissionActivity(Fragment fragment, String... permissions, 
 // 设置不触发错误检测机制（全局设置）
 XXPermissions.setCheckMode(false);
 // 设置权限申请拦截器（全局设置）
-XXPermissions.setInterceptor(new IPermissionInterceptor() {});
+XXPermissions.setInterceptor(new OnPermissionInterceptor() {});
+```
+
+#### 框架混淆规则
+
+* 在混淆规则文件 `proguard-rules.pro` 中加入
+
+```text
+-keep class com.hjq.permissions.** {*;}
 ```
 
 #### 关于权限监听回调参数说明
@@ -215,9 +223,9 @@ XXPermissions.setInterceptor(new IPermissionInterceptor() {});
 
 |     适配细节    | [XXPermissions](https://github.com/getActivity/XXPermissions)  | [AndPermission](https://github.com/yanzhenjie/AndPermission) | [PermissionX](https://github.com/guolindev/PermissionX) |  [AndroidUtilCode-PermissionUtils](https://github.com/Blankj/AndroidUtilCode)   | [PermissionsDispatcher](https://github.com/permissions-dispatcher/PermissionsDispatcher) | [RxPermissions](https://github.com/tbruyelle/RxPermissions) |  [EasyPermissions](https://github.com/googlesamples/easypermissions) |
 | :--------: | :------------: | :------------: | :------------: | :------------: | :------------: | :------------: | :------------: |
-|    对应版本  |  18.2 |  2.0.3  |  1.7.1    |  1.31.0    |   4.9.2  |  0.12   |  3.0.0   |
+|    对应版本  |  20.0 |  2.0.3  |  1.7.1    |  1.31.0    |   4.9.2  |  0.12   |  3.0.0   |
 |    issues 数   |  [![](https://img.shields.io/github/issues/getActivity/XXPermissions.svg)](https://github.com/getActivity/XXPermissions/issues)  |  [![](https://img.shields.io/github/issues/yanzhenjie/AndPermission.svg)](https://github.com/yanzhenjie/AndPermission/issues)  |  [![](https://img.shields.io/github/issues/guolindev/PermissionX.svg)](https://github.com/guolindev/PermissionX/issues)  |  [![](https://img.shields.io/github/issues/Blankj/AndroidUtilCode.svg)](https://github.com/Blankj/AndroidUtilCode/issues)  |  [![](https://img.shields.io/github/issues/permissions-dispatcher/PermissionsDispatcher.svg)](https://github.com/permissions-dispatcher/PermissionsDispatcher/issues)  |  [![](https://img.shields.io/github/issues/tbruyelle/RxPermissions.svg)](https://github.com/tbruyelle/RxPermissions/issues)  |  [![](https://img.shields.io/github/issues/googlesamples/easypermissions.svg)](https://github.com/googlesamples/easypermissions/issues)  |
-|    框架体积  |  82 KB  | 127 KB  |  97 KB  |   500 KB |  99 KB  | 28 KB  | 48 KB |
+|    框架体积  |  87 KB  | 127 KB  |  97 KB  |   500 KB |  99 KB  | 28 KB  | 48 KB |
 |  框架维护状态 |**维护中**|  停止维护 | 停止维护 |  停止维护 | 停止维护 | 停止维护 | 停止维护 |
 |       闹钟提醒权限       |  ✅  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
 |     所有文件管理权限      |  ✅  |  ❌  |  ✅  |  ❌  |  ❌  |  ❌  |  ❌  |
@@ -232,6 +240,7 @@ XXPermissions.setInterceptor(new IPermissionInterceptor() {});
 |     查看应用使用情况权限   |  ✅  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
 |        VPN 权限         |  ✅  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
 |      读取应用列表权限     |  ✅  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |  ❌  |
+|    Android 14 危险权限   |  ✅  |  ❌  |  ✅  |  ❌ |  ❌  |   ❌  |  ❌  |
 |    Android 13 危险权限   |  ✅  |  ❌  |  ✅  |  ❌ |  ❌  |   ❌  |  ❌  |
 |    Android 12 危险权限   |  ✅  |  ❌  |  ✅  |  ❌ |  ❌  |   ❌  |  ❌  |
 |    Android 11 危险权限   |  ✅  |  ❌  |  ✅  |  ❌ |  ❌  |   ❌  |  ❌  |
@@ -359,7 +368,7 @@ XXPermissions.setInterceptor(new IPermissionInterceptor() {});
 
 #### 框架亮点
 
-* 一马当先：首款适配 Android 13 的权限请求框架
+* 一马当先：首款适配 Android 14 的权限请求框架
 
 * 简洁易用：采用链式调用的方式，使用只需一句代码
 
@@ -389,13 +398,17 @@ XXPermissions.setInterceptor(new IPermissionInterceptor() {});
 
 * 悬浮窗框架：[EasyWindow](https://github.com/getActivity/EasyWindow) ![](https://img.shields.io/github/stars/getActivity/EasyWindow.svg) ![](https://img.shields.io/github/forks/getActivity/EasyWindow.svg)
 
-* Shape 框架：[ShapeView](https://github.com/getActivity/ShapeView) ![](https://img.shields.io/github/stars/getActivity/ShapeView.svg) ![](https://img.shields.io/github/forks/getActivity/ShapeView.svg)
+* ShapeView 框架：[ShapeView](https://github.com/getActivity/ShapeView) ![](https://img.shields.io/github/stars/getActivity/ShapeView.svg) ![](https://img.shields.io/github/forks/getActivity/ShapeView.svg)
+
+* ShapeDrawable 框架：[ShapeDrawable](https://github.com/getActivity/ShapeDrawable) ![](https://img.shields.io/github/stars/getActivity/ShapeDrawable.svg) ![](https://img.shields.io/github/forks/getActivity/ShapeDrawable.svg)
 
 * 语种切换框架：[MultiLanguages](https://github.com/getActivity/MultiLanguages) ![](https://img.shields.io/github/stars/getActivity/MultiLanguages.svg) ![](https://img.shields.io/github/forks/getActivity/MultiLanguages.svg)
 
 * Gson 解析容错：[GsonFactory](https://github.com/getActivity/GsonFactory) ![](https://img.shields.io/github/stars/getActivity/GsonFactory.svg) ![](https://img.shields.io/github/forks/getActivity/GsonFactory.svg)
 
 * 日志查看框架：[Logcat](https://github.com/getActivity/Logcat) ![](https://img.shields.io/github/stars/getActivity/Logcat.svg) ![](https://img.shields.io/github/forks/getActivity/Logcat.svg)
+
+* 嵌套滚动布局框架：[NestedScrollLayout](https://github.com/getActivity/NestedScrollLayout) ![](https://img.shields.io/github/stars/getActivity/NestedScrollLayout.svg) ![](https://img.shields.io/github/forks/getActivity/NestedScrollLayout.svg)
 
 * Android 版本适配：[AndroidVersionAdapter](https://github.com/getActivity/AndroidVersionAdapter) ![](https://img.shields.io/github/stars/getActivity/AndroidVersionAdapter.svg) ![](https://img.shields.io/github/forks/getActivity/AndroidVersionAdapter.svg)
 
@@ -424,18 +437,6 @@ XXPermissions.setInterceptor(new IPermissionInterceptor() {});
 #### 如果您觉得我的开源库帮你节省了大量的开发时间，请扫描下方的二维码随意打赏，要是能打赏个 10.24 :monkey_face:就太:thumbsup:了。您的支持将鼓励我继续创作:octocat:（[点击查看捐赠列表](https://github.com/getActivity/Donate)）
 
 ![](https://raw.githubusercontent.com/getActivity/Donate/master/picture/pay_ali.png) ![](https://raw.githubusercontent.com/getActivity/Donate/master/picture/pay_wechat.png)
-
-#### 广告区
-
-* 我现在任腾讯云服务器推广大使，大家如果有购买服务器的需求，可以通过下面的链接购买
-
-[![](https://upload-dianshi-1255598498.file.myqcloud.com/upload/nodir/345X200-9ae456f58874df499adf7c331c02cb0fed12b81d.jpg)](https://curl.qcloud.com/A6cYskvv)
-
-[【腾讯云】云服务器、云数据库、COS、CDN、短信等云产品特惠热卖中](https://curl.qcloud.com/A6cYskvv)
-
-[![](https://upload-dianshi-1255598498.file.myqcloud.com/345-200-b28f7dee9552f4241ea6a543f15a9798049701d4.jpg)](https://curl.qcloud.com/up4fQsdn)
-
-[【腾讯云】中小企业福利专场，多款刚需产品，满足企业通用场景需求](https://curl.qcloud.com/up4fQsdn)
 
 ## License
 

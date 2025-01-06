@@ -22,12 +22,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 import com.hjq.toast.Toaster;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -79,19 +77,19 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
         if (viewId == R.id.btn_main_request_single_permission) {
 
             XXPermissions.with(this)
-                    .permission(Permission.CAMERA)
-                    .interceptor(new PermissionInterceptor())
-                    .request(new OnPermissionCallback() {
+                .permission(Permission.CAMERA)
+                .interceptor(new PermissionInterceptor())
+                .request(new OnPermissionCallback() {
 
-                        @Override
-                        public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
-                            if (!allGranted) {
-                                return;
-                            }
-                            toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                    @Override
+                    public void onGranted(@NonNull List<String> permissions, boolean allGranted) {
+                        if (!allGranted) {
+                            return;
                         }
-                    });
+                        toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
+                            PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                    }
+                });
 
         } else if (viewId == R.id.btn_main_request_group_permission) {
 
@@ -107,7 +105,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -127,7 +125,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -145,7 +143,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -162,7 +160,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                             addCountStepListener();
                         }
                     });
@@ -192,7 +190,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                         return;
                                     }
                                     toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                                 }
                             });
                 }
@@ -221,7 +219,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                         return;
                                     }
                                     toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                                 }
                             });
                 }
@@ -254,11 +252,11 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                         return;
                                     }
                                     toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                                     new Thread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            getAllImagesFromGallery();
+                                            getAllImagesFromGallery(true);
                                         }
                                     }).start();
                                 }
@@ -285,6 +283,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                             .permission(Permission.READ_MEDIA_IMAGES)
                             .permission(Permission.READ_MEDIA_VIDEO)
                             .permission(Permission.READ_MEDIA_AUDIO)
+                            .permission(Permission.READ_MEDIA_VISUAL_USER_SELECTED)
                             .interceptor(new PermissionInterceptor())
                             .request(new OnPermissionCallback() {
 
@@ -294,7 +293,8 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                         return;
                                     }
                                     toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
+                                    getAllImagesFromGallery(false);
                                 }
                             });
                 }
@@ -326,7 +326,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                         return;
                                     }
                                     toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                                 }
                             });
                 }
@@ -345,7 +345,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -362,7 +362,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -379,7 +379,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -396,7 +396,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -423,7 +423,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                         return;
                                     }
                                     toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                                 }
                             });
                 }
@@ -442,7 +442,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                                 toggleNotificationListenerService();
                             }
@@ -462,7 +462,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -479,7 +479,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -496,7 +496,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -513,7 +513,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -530,7 +530,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -547,7 +547,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                         }
                     });
 
@@ -564,7 +564,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                                 return;
                             }
                             toast(String.format(getString(R.string.demo_obtain_permission_success_hint),
-                                    PermissionNameConvert.getPermissionString(MainActivity.this, permissions)));
+                                    PermissionNameConvert.getPermissionNames(MainActivity.this, permissions)));
                             getAppList();
                         }
                     });
@@ -601,9 +601,11 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
     }
 
     /**
-     * 获取所有图片
+     * 获取所有图片媒体
+     *
+     * @param acquireLatitudeAndLongitude           是否获取图片拍摄时的经纬度
      */
-    private void getAllImagesFromGallery() {
+    private void getAllImagesFromGallery(boolean acquireLatitudeAndLongitude) {
         String[] projection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA,
                 MediaStore.MediaColumns.TITLE, MediaStore.Images.Media.SIZE,
                 MediaStore.Images.ImageColumns.LATITUDE, MediaStore.Images.ImageColumns.LONGITUDE};
@@ -615,6 +617,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
 
         int idIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID);
         int pathIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DATA);
+        int titleIndex = cursor.getColumnIndex(MediaStore.MediaColumns.TITLE);
 
         while (cursor.moveToNext()) {
 
@@ -622,34 +625,40 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
 
             float[] latLong = new float[2];
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // 谷歌官方文档：https://developer.android.google.cn/training/data-storage/shared/media?hl=zh-cn#location-media-captured
-                Uri photoUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        cursor.getString(idIndex));
-                photoUri = MediaStore.setRequireOriginal(photoUri);
-                try {
-                    InputStream inputStream = getApplicationContext()
+            // 谷歌官方文档：https://developer.android.google.cn/training/data-storage/shared/media?hl=zh-cn#location-media-captured
+            Uri photoUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                cursor.getString(idIndex));
+            String photoTitle = cursor.getString(titleIndex);
+
+            Log.i("XXPermissions", photoTitle + " = " + filePath);
+
+            if (acquireLatitudeAndLongitude) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    photoUri = MediaStore.setRequireOriginal(photoUri);
+                    try {
+                        InputStream inputStream = getApplicationContext()
                             .getContentResolver().openInputStream(photoUri);
-                    if (inputStream == null) {
-                        continue;
+                        if (inputStream == null) {
+                            continue;
+                        }
+                        ExifInterface exifInterface = new ExifInterface(inputStream);
+                        // 获取图片的经纬度
+                        exifInterface.getLatLong(latLong);
+                        inputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (UnsupportedOperationException e) {
+                        // java.lang.UnsupportedOperationException:
+                        // Caller must hold ACCESS_MEDIA_LOCATION permission to access original
+                        // 经过测试，在部分手机上面申请获取媒体位置权限，如果用户选择的是 "仅在使用中允许"
+                        // 那么就会导致权限是授予状态，但是调用 openInputStream 时会抛出此异常
+                        e.printStackTrace();
                     }
-                    ExifInterface exifInterface = new ExifInterface(inputStream);
-                    // 获取图片的经纬度
-                    exifInterface.getLatLong(latLong);
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedOperationException e) {
-                    // java.lang.UnsupportedOperationException:
-                    // Caller must hold ACCESS_MEDIA_LOCATION permission to access original
-                    // 经过测试，在部分手机上面申请获取媒体位置权限，如果用户选择的是 "仅在使用中允许"
-                    // 那么就会导致权限是授予状态，但是调用 openInputStream 时会抛出此异常
-                    e.printStackTrace();
+                } else {
+                    int latitudeIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.LATITUDE);
+                    int longitudeIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.LONGITUDE);
+                    latLong = new float[]{cursor.getFloat(latitudeIndex), cursor.getFloat(longitudeIndex)};
                 }
-            } else {
-                int latitudeIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.LATITUDE);
-                int longitudeIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.LONGITUDE);
-                latLong = new float[]{cursor.getFloat(latitudeIndex), cursor.getFloat(longitudeIndex)};
             }
 
             if (latLong[0] != 0 && latLong[1] != 0) {
@@ -749,7 +758,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnClic
                 Log.i("XXPermissions", "应用包名：" + info.packageName);
             }
         } catch (Throwable t) {
-            t.printStackTrace();;
+            t.printStackTrace();
         }
     }
 }

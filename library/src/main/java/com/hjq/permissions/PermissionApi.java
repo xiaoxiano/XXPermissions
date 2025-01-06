@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import androidx.annotation.NonNull;
-
+import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,33 +18,7 @@ import java.util.List;
 final class PermissionApi {
 
     @NonNull
-    private static final PermissionDelegate DELEGATE;
-
-    static {
-        if (AndroidVersion.isAndroid13()) {
-            DELEGATE = new PermissionDelegateImplV33();
-        } else if (AndroidVersion.isAndroid12()) {
-            DELEGATE = new PermissionDelegateImplV31();
-        } else if (AndroidVersion.isAndroid11()) {
-            DELEGATE = new PermissionDelegateImplV30();
-        } else if (AndroidVersion.isAndroid10()) {
-            DELEGATE = new PermissionDelegateImplV29();
-        } else if (AndroidVersion.isAndroid9()) {
-            DELEGATE = new PermissionDelegateImplV28();
-        } else if (AndroidVersion.isAndroid8()) {
-            DELEGATE = new PermissionDelegateImplV26();
-        } else if (AndroidVersion.isAndroid6()) {
-            DELEGATE = new PermissionDelegateImplV23();
-        } else if (AndroidVersion.isAndroid5()) {
-            DELEGATE = new PermissionDelegateImplV21();
-        } else if (AndroidVersion.isAndroid4_4()) {
-            DELEGATE = new PermissionDelegateImplV19();
-        } else if (AndroidVersion.isAndroid4_3()) {
-            DELEGATE = new PermissionDelegateImplV18();
-        } else {
-            DELEGATE = new PermissionDelegateImplV14();
-        }
-    }
+    private static final PermissionDelegate DELEGATE = new PermissionDelegateImplV34();
 
     /**
      * 判断某个权限是否授予
@@ -56,22 +30,29 @@ final class PermissionApi {
     /**
      * 判断某个权限是否被永久拒绝
      */
-    static boolean isPermissionPermanentDenied(@NonNull Activity activity, @NonNull String permission) {
-        return DELEGATE.isPermissionPermanentDenied(activity, permission);
+    static boolean isDoNotAskAgainPermission(@NonNull Activity activity, @NonNull String permission) {
+        return DELEGATE.isDoNotAskAgainPermission(activity, permission);
     }
 
     /**
-     * 获取权限设置页意图
+     * 获取权限设置页的意图
      */
-    static Intent getPermissionIntent(@NonNull Context context, @NonNull String permission) {
-        return DELEGATE.getPermissionIntent(context, permission);
+    static Intent getPermissionSettingIntent(@NonNull Context context, @NonNull String permission) {
+        return DELEGATE.getPermissionSettingIntent(context, permission);
+    }
+
+    /**
+     * 重新检查权限回调的结果
+     */
+    static boolean recheckPermissionResult(@NonNull Context context, @NonNull String permission, boolean grantResult) {
+        return DELEGATE.recheckPermissionResult(context, permission, grantResult);
     }
 
     /**
      * 判断某个权限是否是特殊权限
      */
     static boolean isSpecialPermission(@NonNull String permission) {
-        return PermissionUtils.isSpecialPermission(permission);
+        return PermissionHelper.isSpecialPermission(permission);
     }
 
     /**
@@ -139,9 +120,9 @@ final class PermissionApi {
      * @param activity              Activity对象
      * @param permissions            请求的权限
      */
-    static boolean isPermissionPermanentDenied(@NonNull Activity activity, @NonNull List<String> permissions) {
+    static boolean isDoNotAskAgainPermissions(@NonNull Activity activity, @NonNull List<String> permissions) {
         for (String permission : permissions) {
-            if (isPermissionPermanentDenied(activity, permission)) {
+            if (isDoNotAskAgainPermission(activity, permission)) {
                 return true;
             }
         }
@@ -180,5 +161,50 @@ final class PermissionApi {
             }
         }
         return grantedPermissions;
+    }
+
+    /**
+     * 根据传入的权限自动选择最合适的权限设置页
+     *
+     * @param permissions                 请求失败的权限
+     */
+    static Intent getSmartPermissionIntent(@NonNull Context context, @Nullable List<String> permissions) {
+        // 如果失败的权限里面不包含特殊权限
+        if (permissions == null || permissions.isEmpty()) {
+            return PermissionIntentManager.getApplicationDetailsIntent(context);
+        }
+
+        // 危险权限统一处理
+        if (!PermissionApi.containsSpecialPermission(permissions)) {
+            if (permissions.size() == 1) {
+                return PermissionApi.getPermissionSettingIntent(context, permissions.get(0));
+            }
+            return PermissionIntentManager.getApplicationDetailsIntent(context, permissions);
+        }
+
+        // 特殊权限统一处理
+        switch (permissions.size()) {
+            case 1:
+                // 如果当前只有一个权限被拒绝了
+                return PermissionApi.getPermissionSettingIntent(context, permissions.get(0));
+            case 2:
+                if (!AndroidVersion.isAndroid13() &&
+                    PermissionUtils.containsPermission(permissions, Permission.NOTIFICATION_SERVICE) &&
+                    PermissionUtils.containsPermission(permissions, Permission.POST_NOTIFICATIONS)) {
+                    return PermissionApi.getPermissionSettingIntent(context, Permission.NOTIFICATION_SERVICE);
+                }
+                break;
+            case 3:
+                if (AndroidVersion.isAndroid11() &&
+                    PermissionUtils.containsPermission(permissions, Permission.MANAGE_EXTERNAL_STORAGE) &&
+                    PermissionUtils.containsPermission(permissions, Permission.READ_EXTERNAL_STORAGE) &&
+                    PermissionUtils.containsPermission(permissions, Permission.WRITE_EXTERNAL_STORAGE)) {
+                    return PermissionApi.getPermissionSettingIntent(context, Permission.MANAGE_EXTERNAL_STORAGE);
+                }
+                break;
+            default:
+                break;
+        }
+        return PermissionIntentManager.getApplicationDetailsIntent(context);
     }
 }
